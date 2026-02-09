@@ -19,7 +19,6 @@
   },
   "files": [
     "bin/",
-    "skills/",
     "LICENSE",
     "README.md"
   ],
@@ -30,4 +29,3 @@
     "access": "public"
   }
 }
-
