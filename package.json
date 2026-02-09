@@ -1,0 +1,33 @@
+{
+  "name": "@cloudbrowser/skills",
+  "version": "0.0.1",
+  "description": "Install CloudBrowser Codex skills (wrapper around the skills CLI).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CloudBrowser-AI/skills.git"
+  },
+  "homepage": "https://github.com/CloudBrowser-AI/skills",
+  "bugs": {
+    "url": "https://github.com/CloudBrowser-AI/skills/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "skills": "bin/cli.cjs"
+  },
+  "files": [
+    "bin/",
+    "skills/",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "skills": "^1.3.7"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
+

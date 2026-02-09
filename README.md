@@ -1,28 +1,33 @@
-# skills
+# @cloudbrowser/skills
 
-Codex skills repo.
+Install CloudBrowser Codex skills.
 
-## Structure
+## Quick install
 
-Skills live under `skills/<skill-name>/` and each skill must include a `SKILL.md` at its root:
+Interactive:
+```bash
+npx @cloudbrowser/skills
+```
 
-`skills/cloudbrowser/SKILL.md`
+Non-interactive (recommended):
+```bash
+npx @cloudbrowser/skills --global --skill cloudbrowser -y
+```
 
-## Install (via npx)
+## What this runs
 
-This repo is compatible with the `skills` installer (same pattern as `remotion-dev/skills`):
+This package is a thin wrapper around the `skills` CLI and defaults to installing from:
 
+- `CloudBrowser-AI/skills`
+
+You can also use the upstream CLI directly:
 ```bash
 npx skills add CloudBrowser-AI/skills --skill cloudbrowser
 ```
 
-También funciona con URL completa:
-```bash
-npx skills add https://github.com/CloudBrowser-AI/skills --skill cloudbrowser
-```
+## Repo layout
 
-## Develop locally
+Skills live under `skills/<skill-name>/`:
 
-This workspace keeps a junction so Codex can load the skill from `$CODEX_HOME/skills`:
+- `skills/cloudbrowser/SKILL.md`
 
-- `$CODEX_HOME/skills/cloudbrowser` -> this repo's `skills/cloudbrowser`
