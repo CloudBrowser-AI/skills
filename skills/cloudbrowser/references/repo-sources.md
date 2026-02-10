@@ -1,15 +1,14 @@
 # Repo Sources (cloudbrowser)
 
-Si estas trabajando en el repo `c:\\Users\\Luis\\git\\cloudbrowser`, estas rutas son la fuente de verdad para instalacion/uso del MCP server:
+If you are working in the repo `c:\\Users\\Luis\\git\\cloudbrowser`, these paths are the source of truth for installing/using the MCP server:
 
-- Documentacion (GitBook):
+- Documentation (GitBook):
   - `c:\\Users\\Luis\\git\\cloudbrowser\\GitBook\\get-started\\mcp-server.md`
   - `c:\\Users\\Luis\\git\\cloudbrowser\\GitBook\\get-started\\n8n-integration.md`
-- Paquete npm / implementacion del servidor:
+- npm package / server implementation:
   - `c:\\Users\\Luis\\git\\cloudbrowser\\CloudBrowserMCP\\README.md`
   - `c:\\Users\\Luis\\git\\cloudbrowser\\CloudBrowserMCP\\package.json` (version, scripts, Node engine)
-  - `c:\\Users\\Luis\\git\\cloudbrowser\\CloudBrowserMCP\\src\\server.js` (tool list + inputSchema, CLI flags `--transport` y `--port`)
-  - `c:\\Users\\Luis\\git\\cloudbrowser\\CloudBrowserMCP\\stdio-config-example.json` (config base para clientes STDIO)
+  - `c:\\Users\\Luis\\git\\cloudbrowser\\CloudBrowserMCP\\src\\server.js` (tool list + inputSchema, CLI flags `--transport` and `--port`)
+  - `c:\\Users\\Luis\\git\\cloudbrowser\\CloudBrowserMCP\\stdio-config-example.json` (baseline config for STDIO clients)
 
-Recomendacion: si hay discrepancias entre ejemplos y lo que el servidor acepta, creer en `tools/list` (por HTTP) o en `CloudBrowserMCP\\src\\server.js` (si estas ejecutando local).
-
+Recommendation: if there are discrepancies between examples and what the server accepts, trust `tools/list` (over HTTP) or `CloudBrowserMCP\\src\\server.js` (when running locally).

@@ -57,6 +57,13 @@ function guessDesktopDir() {
   // "Desktop" isn't guaranteed to exist on all systems, but it's the best default.
   if (process.platform === "win32") {
     const home = process.env.USERPROFILE || os.homedir();
+    // Many Windows setups redirect Desktop into OneDrive.
+    const oneDrive =
+      process.env.OneDrive || process.env.OneDriveConsumer || process.env.OneDriveCommercial || null;
+    if (oneDrive) {
+      const odDesktop = path.join(oneDrive, "Desktop");
+      if (fs.existsSync(odDesktop)) return odDesktop;
+    }
     return path.join(home, "Desktop");
   }
   return path.join(os.homedir(), "Desktop");
@@ -89,8 +96,12 @@ function pickScreenshotDataUrlFromJson(obj) {
   // Most common output from scripts/mcp_http_call.mjs
   candidates.push(obj?.jsonrpc?.result?.screenshot);
   candidates.push(obj?.jsonrpc?.result?.screenshotDataUrl);
+  candidates.push(obj?.jsonrpc?.result?.content?.[0]?.image_url?.url);
+  candidates.push(obj?.jsonrpc?.result?.content?.[0]?.imageUrl?.url);
   candidates.push(obj?.result?.screenshot);
   candidates.push(obj?.result?.screenshotDataUrl);
+  candidates.push(obj?.result?.content?.[0]?.image_url?.url);
+  candidates.push(obj?.result?.content?.[0]?.imageUrl?.url);
   candidates.push(obj?.screenshot);
   candidates.push(obj?.screenshotDataUrl);
 
@@ -112,7 +123,7 @@ function pickScreenshotDataUrlFromJson(obj) {
 function parseDataUrl(dataUrl) {
   const m = /^data:(image\/[a-z0-9.+-]+);base64,([\s\S]+)$/i.exec(dataUrl.trim());
   if (!m) return null;
-  return { mime: m[1].toLowerCase(), b64: m[2].replace(/\s+/g, "") };
+  return { mime: m[1].toLowerCase(), b64: normalizeBase64(m[2]) };
 }
 
 function extForMime(mime) {
@@ -120,6 +131,63 @@ function extForMime(mime) {
   if (mime === "image/png") return "png";
   if (mime === "image/webp") return "webp";
   return "bin";
+}
+
+function normalizeBase64(b64) {
+  // Copy/paste often introduces quotes/backticks/commas/braces. Node's base64 decoder is permissive
+  // and can silently produce corrupted output; sanitize + pad.
+  let s = String(b64).trim();
+  if (
+    (s.startsWith("\"") && s.endsWith("\"")) ||
+    (s.startsWith("'") && s.endsWith("'")) ||
+    (s.startsWith("`") && s.endsWith("`"))
+  ) {
+    s = s.slice(1, -1);
+  }
+  s = s.replace(/\s+/g, "");
+  // Convert base64url -> base64 if needed.
+  if (s.includes("-") || s.includes("_")) {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+  }
+  // Drop any remaining non-base64 chars (e.g. trailing `",` or `}`).
+  s = s.replace(/[^A-Za-z0-9+/=]/g, "");
+  const mod = s.length % 4;
+  if (mod === 2) s += "==";
+  else if (mod === 3) s += "=";
+  return s;
+}
+
+function sniffImageMime(buf) {
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47 &&
+    buf[4] === 0x0d &&
+    buf[5] === 0x0a &&
+    buf[6] === 0x1a &&
+    buf[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (buf.length >= 12 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") {
+    return "image/webp";
+  }
+  return null;
+}
+
+function looksTruncated(mime, buf) {
+  if (mime === "image/jpeg") {
+    return !(buf.length >= 2 && buf[buf.length - 2] === 0xff && buf[buf.length - 1] === 0xd9);
+  }
+  if (mime === "image/png") {
+    // Quick check for IEND marker near end. Not exhaustive.
+    const tail = buf.slice(Math.max(0, buf.length - 64));
+    return !tail.includes(Buffer.from("IEND"));
+  }
+  return false;
 }
 
 async function readStdin() {
@@ -161,7 +229,9 @@ async function main() {
     process.exit(2);
   }
 
-  const ext = extForMime(parsed.mime);
+  // Prefer actual bytes over declared mime (mislabels happen, and users sometimes force --out ...jpg).
+  const sniffedMime = sniffImageMime(buf) || parsed.mime;
+  const ext = extForMime(sniffedMime);
 
   const desktop = guessDesktopDir();
   const defaultDir = path.join(desktop, "CloudBrowser Screenshots");
@@ -175,7 +245,16 @@ async function main() {
       outPath = path.join(p, `cloudbrowser_screenshot_${timestamp()}.${ext}`);
     } else {
       ensureDir(path.dirname(p));
-      outPath = p;
+      // If user provided an explicit extension that doesn't match the decoded bytes, adjust it.
+      const providedExt = path.extname(p).toLowerCase();
+      const normalizedProvided = providedExt === ".jpeg" ? ".jpg" : providedExt;
+      const targetExt = "." + ext;
+      outPath = normalizedProvided && normalizedProvided !== targetExt ? p.slice(0, -providedExt.length) + targetExt : p;
+      if (normalizedProvided && normalizedProvided !== targetExt) {
+        console.error(
+          `Note: output extension ${normalizedProvided} did not match detected type (${sniffedMime}); saved as ${path.basename(outPath)}`
+        );
+      }
     }
   } else {
     ensureDir(defaultDir);
@@ -183,6 +262,9 @@ async function main() {
   }
 
   fs.writeFileSync(outPath, buf);
+  if (looksTruncated(sniffedMime, buf)) {
+    console.error("Warning: image bytes look truncated. If you copy/pasted the data URL, it may have been cut off.");
+  }
   process.stdout.write(outPath + "\n");
 }
 
@@ -190,4 +272,3 @@ main().catch((err) => {
   console.error(err?.stack || String(err));
   process.exit(1);
 });
-

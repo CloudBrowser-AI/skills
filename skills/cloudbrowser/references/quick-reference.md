@@ -2,13 +2,13 @@
 
 ## Token
 
-- Formato esperado: UUID.
-- STDIO: configurar `CLOUDBROWSER_API_TOKEN`.
-- HTTP: enviar `Authorization: Bearer <token>`.
+- Expected format: UUID.
+- STDIO: set `CLOUDBROWSER_API_TOKEN`.
+- HTTP: send `Authorization: Bearer <token>`.
 
 ## STDIO (Claude Desktop / Cursor)
 
-Configuracion base:
+Base configuration:
 ```json
 {
   "mcpServers": {
@@ -23,15 +23,15 @@ Configuracion base:
 }
 ```
 
-Ubicaciones comunes:
+Common locations:
 
 - Claude Desktop (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Claude Desktop (Windows): `%APPDATA%\\Claude\\claude_desktop_config.json`
 - Cursor: `~/.cursor/mcp.json`
 
-## HTTP (Hosted o Local)
+## HTTP (Hosted or Local)
 
-### Descubrir schemas reales (siempre)
+### Discover real schemas (always)
 
 `tools/list`:
 ```json
@@ -43,11 +43,11 @@ Ubicaciones comunes:
 }
 ```
 
-Nota: No asumir nombres de campos de ejemplos viejos. Tomar `inputSchema` desde `tools/list`.
+Note: Do not assume field names from older examples. Read `inputSchema` from `tools/list`.
 
-### Llamar una herramienta
+### Call a tool
 
-Plantilla `tools/call`:
+`tools/call` template:
 ```json
 {
   "jsonrpc": "2.0",
@@ -63,48 +63,48 @@ Plantilla `tools/call`:
 }
 ```
 
-### Script de prueba (Node)
+### Test script (Node)
 
-Listar herramientas:
+List tools:
 ```bash
 node scripts/mcp_http_call.mjs --token <uuid> --method tools/list
 ```
 
-Abrir browser:
+Open browser:
 ```bash
 node scripts/mcp_http_call.mjs --token <uuid> --tool open_browser --args "{\"headless\":true,\"keepOpen\":300}"
 ```
 
-Tomar screenshot y guardarlo en el Desktop (default):
+Take a screenshot and save it to Desktop (default):
 ```bash
 node scripts/mcp_http_call.mjs --token <uuid> --tool take_screenshot --args "{\"sessionId\":\"session-1\",\"type\":\"jpeg\"}" --save-screenshot
 ```
 
-Guardar un `data:image/...;base64,...` manualmente (stdin -> Desktop):
+Save a `data:image/...;base64,...` manually (stdin -> Desktop):
 ```bash
 echo "data:image/jpeg;base64,..." | node scripts/save_data_url_image.mjs
 ```
 
-## Flujo recomendado (v0.1.2 del paquete)
+## Recommended flow (package v0.1.2)
 
-1. `open_browser` -> leer `address` (ws endpoint) del resultado.
-2. `connect_to_browser` con:
-   - `browserAddress`: el `address` anterior
-   - `sessionId`: string elegido por el cliente (ej: `session-1`)
-3. Control con `sessionId`:
+1. `open_browser` -> read `address` (ws endpoint) from the result.
+2. `connect_to_browser` with:
+   - `browserAddress`: the `address` from the previous step
+   - `sessionId`: a string chosen by the client (e.g. `session-1`)
+3. Control with `sessionId`:
    - `navigate_to_url`
    - `get_page_content`
    - `click_element`
    - `type_text`
    - `take_screenshot`
    - `evaluate_script`
-4. Limpiar:
-   - `disconnect_browser` (por `sessionId`)
-   - `close_browser` (por `address`, si aplica)
+4. Cleanup:
+   - `disconnect_browser` (by `sessionId`)
+   - `close_browser` (by `address`, if applicable)
 
 ## Login walls / Remote Desktop link
 
-Si te bloquea un login/2FA/CAPTCHA, **no cierres el browser**. Inicia Remote Desktop y comparte link directo:
+If a login/2FA/CAPTCHA blocks you, **do not close the browser**. Start Remote Desktop and share the direct link:
 
 - WebSocket: `ws://browser.cloudbrowser.ai/<num>/devtools/browser/<id>`
 - Link: `https://app.cloudbrowser.ai/remote-desktop/<num>/0`

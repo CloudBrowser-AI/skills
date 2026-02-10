@@ -1,4 +1,4 @@
 interface:
   display_name: "CloudBrowser MCP"
-  short_description: "Instala, configura y prueba CloudBrowser MCP (stdio/HTTP)"
-  default_prompt: "Configura CloudBrowser MCP (Claude Desktop, Cursor, Inspector o HTTP), valida el token y ejecuta una prueba tools/list + tools/call. Si hay muros de login, no cierres el browser: ofrece Remote Desktop (https://app.cloudbrowser.ai/remote-desktop/<num>/0). Para screenshots, guarda el .jpg en Desktop (no pegues base64)."
+  short_description: "Install, configure, and test CloudBrowser MCP (stdio/HTTP)"
+  default_prompt: "Configure CloudBrowser MCP (Claude Desktop, Cursor, Inspector, or HTTP), validate the token, and run a tools/list + tools/call smoke test. If a login wall blocks you, do not close the browser: offer Remote Desktop (https://app.cloudbrowser.ai/remote-desktop/<num>/0). For screenshots, save the .jpg to Desktop (do not paste base64)."

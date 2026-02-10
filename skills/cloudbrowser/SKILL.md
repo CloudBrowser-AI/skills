@@ -7,64 +7,82 @@ description: Install, configure, and use the CloudBrowser.ai MCP server (@cloudb
 
 ## Overview
 
-Configurar e integrar el servidor MCP de CloudBrowser para automatizacion de navegadores remotos: via STDIO (clientes MCP tipo Claude Desktop/Cursor/Inspector) o via HTTP (JSON-RPC 2.0) para n8n/Make/OpenAI Agents.
+Configure and integrate CloudBrowser's MCP server for remote browser automation: via STDIO (MCP clients like Claude Desktop/Cursor/Inspector) or via HTTP (JSON-RPC 2.0) for n8n/Make/OpenAI Agents.
 
 ## Workflow Decision Tree
 
-1. Identificar el tipo de integracion
-- Cliente MCP con soporte STDIO (Claude Desktop, Cursor, Inspector): usar STDIO.
-- Orquestador/HTTP (n8n, Make, OpenAI Agents, scripts): usar HTTP JSON-RPC.
-- Auto-host local: ejecutar el paquete npm con `--transport http` o `--transport stdio`.
+1. Identify the integration type
+- MCP client with STDIO support (Claude Desktop, Cursor, Inspector): use STDIO.
+- Orchestrator/HTTP (n8n, Make, OpenAI Agents, scripts): use HTTP JSON-RPC.
+- Local self-host: run the npm package with `--transport http` or `--transport stdio`.
 
-2. Obtener token
-- Requerir un token de CloudBrowser en formato UUID.
-- STDIO: usar `CLOUDBROWSER_API_TOKEN` (recomendado) o pasar `apiToken` en argumentos de herramientas cuando aplique.
-- HTTP: enviar `Authorization: Bearer <token>`.
+2. Get a token
+- You need a CloudBrowser token in UUID format.
+- STDIO: use `CLOUDBROWSER_API_TOKEN` (recommended) or pass `apiToken` in tool arguments when applicable.
+- HTTP: send `Authorization: Bearer <token>`.
 
-3. Validar que el cliente ve herramientas
-- Ejecutar `tools/list` (por HTTP) o abrir el MCP client y confirmar que aparecen herramientas como `open_browser`.
+3. Validate the client can see tools
+- Run `tools/list` (over HTTP) or open the MCP client and confirm tools like `open_browser` show up.
 
-4. Usar el flujo correcto de herramientas
-- `open_browser` (abre navegador remoto) -> obtener `address` (ws endpoint)
-- `connect_to_browser` con `browserAddress=address` + `sessionId` (id elegido por el cliente)
+4. Use the correct tool flow
+- `open_browser` (opens a remote browser) -> get `address` (ws endpoint)
+- `connect_to_browser` with `browserAddress=address` + `sessionId` (chosen by the client)
 - Control: `navigate_to_url`, `click_element`, `type_text`, `get_page_content`, `take_screenshot`, `evaluate_script`
-- Cierre/limpieza: `disconnect_browser` (por `sessionId`) y opcionalmente `close_browser` (por `address`).
+- Cleanup: `disconnect_browser` (by `sessionId`) and optionally `close_browser` (by `address`).
 
-## Muros De Login (No Cerrar, Pedir Accion Al Usuario)
+## Login Walls (Do Not Close, Ask User)
 
-Si la navegacion queda bloqueada por un muro de login / CAPTCHA / 2FA:
+If navigation gets blocked by a login wall / CAPTCHA / 2FA:
 
-- **No cerrar el navegador**.
-- Pedirle al usuario como proceder: si desea introducir credenciales manualmente, si prefiere otra fuente/flujo, o si se cancela.
-- Si el usuario va a intervenir, iniciar escritorio remoto (`start_remote_desktop`) y **darle el link directo** al escritorio remoto derivado del websocket (`address`) para que pueda entrar sin copiar el WS.
+- **Do not close the browser**.
+- Ask the user how they want to proceed: enter credentials manually, use an alternative flow/source, or cancel.
+- If the user will intervene, start remote desktop (`start_remote_desktop`) and share the **direct** Remote Desktop link derived from the websocket (`address`) so they can open it without copying the WS.
 
-### URL De Escritorio Remoto (Desde WebSocket `address`)
+### Policy: Never Show The Remote Desktop Password In Chat
 
-Si el websocket es:
+When you call `start_remote_desktop`, the tool returns a `password`.
+
+- **Never** paste/print that `password` in chat.
+- Instead:
+  - Share **only** the Remote Desktop link.
+  - Store the `password` in a local file and tell the user the file path.
+
+Recommended path (Windows):
+- `%TEMP%\\cloudbrowser-remote-desktop-password.txt`
+
+### Remote Desktop URL (From WebSocket `address`)
+
+If the websocket is:
 - `ws://browser.cloudbrowser.ai/<num>/devtools/browser/<id>`
 
-Entonces el link directo es:
+Then the direct link is:
 - `https://app.cloudbrowser.ai/remote-desktop/<num>/0`
 
-Puedes obtenerlo con:
+You can generate it with:
 - `node scripts/ws_to_remote_desktop_url.mjs --ws "<address>"`
 
-## Capturas De Pantalla (Default: Guardar En Desktop)
+To store the password locally (without showing it in chat):
+- `node scripts/store_remote_desktop_password.mjs --password "<password>" --out "%TEMP%\\cloudbrowser-remote-desktop-password.txt"`
 
-`take_screenshot` devuelve un `data:image/<...>;base64,...`. **Por defecto, NO pegar ese string en el chat**: convertirlo a `.jpg` y guardarlo en el Desktop del cliente para que se pueda abrir/compartir.
+## Screenshots (Default: Save To Desktop)
 
-- Preferir `type: "jpeg"` (evita problemas con opciones de `png` en algunos clientes/SDKs).
-- Guardado recomendado:
-  - Si tienes el `data:image/...` (o el JSON completo que lo contiene), pipealo al script:
+`take_screenshot` returns a `data:image/<...>;base64,...`. **By default, do NOT paste that string into chat**: convert it to a `.jpg` and save it on the user's Desktop so it can be opened/shared.
+
+- Prefer `type: "jpeg"` (avoids issues with `png` options in some clients/SDKs).
+- Recommended saving:
+  - If you have the `data:image/...` (or the full JSON containing it), pipe it into the script:
     - `node scripts/save_data_url_image.mjs`
-  - En HTTP/JSON-RPC, puedes usar `--save-screenshot` directamente en `mcp_http_call.mjs` (ver `references/quick-reference.md`).
+  - Over HTTP/JSON-RPC, you can use `--save-screenshot` directly in `mcp_http_call.mjs` (see `references/quick-reference.md`).
+- If the saved file "looks corrupt":
+  - It is almost always an incomplete `data:image/...` copy/paste (truncated) or with extra characters.
+  - Avoid copy/paste: use `--save-screenshot` (HTTP) or pipe the full JSON.
 
 ## STDIO Setup (Claude Desktop / Cursor / MCP Clients)
 
-1. Verificar Node.js
-- Requerir Node >= 18 (el paquete usa `fetch` y ESM).
+1. Verify Node.js
+- Requires Node >= 18 (the package uses `fetch` and ESM).
 
-2. Configuracion MCP (ejemplo)
+2. MCP configuration (example)
 ```json
 {
   "mcpServers": {
@@ -79,23 +97,23 @@ Puedes obtenerlo con:
 }
 ```
 
-3. Ubicacion tipica de config
+3. Typical config locations
 - Claude Desktop macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Claude Desktop Windows: `%APPDATA%\\Claude\\claude_desktop_config.json`
 - Cursor: `~/.cursor/mcp.json`
 
-4. Reiniciar el cliente MCP para que cargue la configuracion.
+4. Restart the MCP client so it reloads the configuration.
 
 ## HTTP Setup (n8n / Make / OpenAI Agents / Custom Clients)
 
-1. Usar endpoint hosteado
+1. Use the hosted endpoint
 - Endpoint: `https://mcp.cloudbrowser.ai`
 - Header: `Authorization: Bearer <token>`
 
-2. Llamar herramientas con JSON-RPC 2.0
-- Siempre empezar por `tools/list` para obtener el schema real (evitar ejemplos desfasados que usan `browserId` vs `address`, etc.).
+2. Call tools with JSON-RPC 2.0
+- Always start with `tools/list` to get the real schema (avoid outdated examples that use `browserId` vs `address`, etc.).
 
-`tools/list` (ejemplo):
+`tools/list` (example):
 ```json
 {
   "jsonrpc": "2.0",
@@ -105,7 +123,7 @@ Puedes obtenerlo con:
 }
 ```
 
-`tools/call` (plantilla):
+`tools/call` (template):
 ```json
 {
   "jsonrpc": "2.0",
@@ -121,35 +139,35 @@ Puedes obtenerlo con:
 }
 ```
 
-3. Probar rapidamente desde linea de comandos
-- Usar `scripts/mcp_http_call.mjs` (ver abajo) para ejecutar `tools/list` y `tools/call` contra el endpoint (hosteado o local).
+3. Quick CLI test
+- Use `scripts/mcp_http_call.mjs` (see below) to run `tools/list` and `tools/call` against the endpoint (hosted or local).
 
 ## Self-Host (Local HTTP Transport)
 
-1. Ejecutar servidor HTTP local
+1. Run a local HTTP server
 ```powershell
 npx @cloudbrowser/mcp-server --transport http --port 3000
 ```
 
-2. Salud
+2. Health
 - `GET http://localhost:3000/health`
 
 3. JSON-RPC
-- El endpoint principal es `POST http://localhost:3000/` con JSON-RPC 2.0.
+- The main endpoint is `POST http://localhost:3000/` with JSON-RPC 2.0.
 
-## Troubleshooting (Rapido)
+## Troubleshooting (Quick)
 
-- 401 UNAUTHORIZED: falta `Authorization: Bearer ...` o token invalido (debe ser UUID).
-- El cliente no ve herramientas: revisar que el JSON de config sea valido y reiniciar el cliente.
-- Errores por schema: ejecutar `tools/list` y ajustar nombres/required fields a lo que devuelve el servidor.
+- 401 UNAUTHORIZED: missing `Authorization: Bearer ...` or invalid token (must be a UUID).
+- The client cannot see tools: validate the config JSON and restart the client.
+- Schema errors: run `tools/list` and align names/required fields to what the server returns.
 
 ## Resources
 
 ### scripts/
-- `scripts/mcp_http_call.mjs`: helper para llamar `tools/list` y `tools/call` por HTTP.
-- `scripts/save_data_url_image.mjs`: convierte `data:image/...;base64,...` (o JSON con `screenshot`) a un archivo en el Desktop.
-- `scripts/ws_to_remote_desktop_url.mjs`: convierte el websocket `address` a un link `https://app.cloudbrowser.ai/remote-desktop/<num>/0`.
+- `scripts/mcp_http_call.mjs`: helper to call `tools/list` and `tools/call` over HTTP.
+- `scripts/save_data_url_image.mjs`: converts `data:image/...;base64,...` (or JSON with `screenshot`) into a file on the Desktop.
+- `scripts/ws_to_remote_desktop_url.mjs`: converts websocket `address` into a `https://app.cloudbrowser.ai/remote-desktop/<num>/0` link.
 
 ### references/
-- `references/quick-reference.md`: snippets y patrones de uso (stdio + http) y flujo recomendado.
-- `references/repo-sources.md`: archivos del repo `cloudbrowser` que actuan como fuente de verdad (tool schemas, docs, ejemplos).
+- `references/quick-reference.md`: snippets and usage patterns (stdio + http) and the recommended flow.
+- `references/repo-sources.md`: files in the `cloudbrowser` repo that act as the source of truth (tool schemas, docs, examples).

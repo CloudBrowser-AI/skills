@@ -54,6 +54,12 @@ function usageAndExit(code) {
 function guessDesktopDir() {
   if (process.platform === "win32") {
     const home = process.env.USERPROFILE || os.homedir();
+    const oneDrive =
+      process.env.OneDrive || process.env.OneDriveConsumer || process.env.OneDriveCommercial || null;
+    if (oneDrive) {
+      const odDesktop = path.join(oneDrive, "Desktop");
+      if (fs.existsSync(odDesktop)) return odDesktop;
+    }
     return path.join(home, "Desktop");
   }
   return path.join(os.homedir(), "Desktop");
@@ -83,7 +89,7 @@ function timestamp() {
 function parseDataUrl(dataUrl) {
   const m = /^data:(image\/[a-z0-9.+-]+);base64,([\s\S]+)$/i.exec(String(dataUrl).trim());
   if (!m) return null;
-  return { mime: m[1].toLowerCase(), b64: m[2].replace(/\s+/g, "") };
+  return { mime: m[1].toLowerCase(), b64: normalizeBase64(m[2]) };
 }
 
 function extForMime(mime) {
@@ -93,6 +99,58 @@ function extForMime(mime) {
   return "bin";
 }
 
+function normalizeBase64(b64) {
+  let s = String(b64).trim();
+  if (
+    (s.startsWith("\"") && s.endsWith("\"")) ||
+    (s.startsWith("'") && s.endsWith("'")) ||
+    (s.startsWith("`") && s.endsWith("`"))
+  ) {
+    s = s.slice(1, -1);
+  }
+  s = s.replace(/\s+/g, "");
+  if (s.includes("-") || s.includes("_")) {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+  }
+  s = s.replace(/[^A-Za-z0-9+/=]/g, "");
+  const mod = s.length % 4;
+  if (mod === 2) s += "==";
+  else if (mod === 3) s += "=";
+  return s;
+}
+
+function sniffImageMime(buf) {
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47 &&
+    buf[4] === 0x0d &&
+    buf[5] === 0x0a &&
+    buf[6] === 0x1a &&
+    buf[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (buf.length >= 12 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") {
+    return "image/webp";
+  }
+  return null;
+}
+
+function looksTruncated(mime, buf) {
+  if (mime === "image/jpeg") {
+    return !(buf.length >= 2 && buf[buf.length - 2] === 0xff && buf[buf.length - 1] === 0xd9);
+  }
+  if (mime === "image/png") {
+    const tail = buf.slice(Math.max(0, buf.length - 64));
+    return !tail.includes(Buffer.from("IEND"));
+  }
+  return false;
+}
+
 function saveScreenshotDataUrl({ dataUrl, out }) {
   const parsed = parseDataUrl(dataUrl);
   if (!parsed) return null;
@@ -100,7 +158,8 @@ function saveScreenshotDataUrl({ dataUrl, out }) {
   const buf = Buffer.from(parsed.b64, "base64");
   if (!buf.length) throw new Error("Decoded screenshot buffer is empty.");
 
-  const ext = extForMime(parsed.mime);
+  const sniffedMime = sniffImageMime(buf) || parsed.mime;
+  const ext = extForMime(sniffedMime);
   const desktop = guessDesktopDir();
   const defaultDir = path.join(desktop, "CloudBrowser Screenshots");
 
@@ -113,7 +172,15 @@ function saveScreenshotDataUrl({ dataUrl, out }) {
       outPath = path.join(p, `cloudbrowser_screenshot_${timestamp()}.${ext}`);
     } else {
       ensureDir(path.dirname(p));
-      outPath = p;
+      const providedExt = path.extname(p).toLowerCase();
+      const normalizedProvided = providedExt === ".jpeg" ? ".jpg" : providedExt;
+      const targetExt = "." + ext;
+      outPath = normalizedProvided && normalizedProvided !== targetExt ? p.slice(0, -providedExt.length) + targetExt : p;
+      if (normalizedProvided && normalizedProvided !== targetExt) {
+        console.error(
+          `Note: output extension ${normalizedProvided} did not match detected type (${sniffedMime}); saved as ${path.basename(outPath)}`
+        );
+      }
     }
   } else {
     ensureDir(defaultDir);
@@ -121,6 +188,9 @@ function saveScreenshotDataUrl({ dataUrl, out }) {
   }
 
   fs.writeFileSync(outPath, buf);
+  if (looksTruncated(sniffedMime, buf)) {
+    console.error("Warning: screenshot bytes look truncated. If you copy/pasted the data URL, it may have been cut off.");
+  }
   return outPath;
 }
 
