@@ -29,6 +29,23 @@ Configure and integrate CloudBrowser's MCP server for remote browser automation:
 - `connect_to_browser` with `browserAddress=address` + `sessionId` (chosen by the client)
 - Control: `navigate_to_url`, `click_element`, `type_text`, `get_page_content`, `take_screenshot`, `evaluate_script`
 - Cleanup: `disconnect_browser` (by `sessionId`) and optionally `close_browser` (by `address`).
+- For auth/navigation/content, default to Puppeteer-style browser control commands (the tools above), not actor remote endpoints.
+
+## API Scope vs Puppeteer Scope (Mandatory)
+
+- Use API only for specific lifecycle/security actions: `open`, `close`, `login`, and captcha solving (`/solve`).
+- Use Puppeteer-style commands for the rest: page navigation, selectors, typing, clicking, waits, DOM/script execution, and content extraction.
+- Authentication should be mostly driven by browser automation (`navigate_to_url` + `type_text` + `click_element` + `evaluate_script`) unless a dedicated API login step is explicitly required.
+
+## Deprecated Actor Endpoints (Do Not Use)
+
+- `CloudBrowserActor` HTTP functions are obsolete for runtime navigation/content.
+- Do not use:
+  - `/api/v1/remote/goto`
+  - `/api/v1/remote/getcontent`
+  - `/api/GoTo`
+  - `/api/GetContent`
+- If an old flow still references these endpoints, migrate it to MCP browser commands immediately.
 
 ## Login Walls (Do Not Close, Ask User)
 
@@ -37,6 +54,7 @@ If navigation gets blocked by a login wall / CAPTCHA / 2FA:
 - **Do not close the browser**.
 - Ask the user how they want to proceed: enter credentials manually, use an alternative flow/source, or cancel.
 - If the user will intervene, start remote desktop (`start_remote_desktop`) and share the **direct** Remote Desktop link derived from the websocket (`address`) so they can open it without copying the WS.
+- If credentials must be entered by automation, prefer `type_text` and `click_element` against the login form; reserve API login for explicit, supported cases.
 
 ### Policy: Never Show The Remote Desktop Password In Chat
 

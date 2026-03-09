@@ -1,4 +1,4 @@
 interface:
   display_name: "CloudBrowser MCP"
   short_description: "Install, configure, and test CloudBrowser MCP (stdio/HTTP)"
-  default_prompt: "Configure CloudBrowser MCP (Claude Desktop, Cursor, Inspector, or HTTP), validate the token, and run a tools/list + tools/call smoke test. If a login wall blocks you, do not close the browser: offer Remote Desktop (https://app.cloudbrowser.ai/remote-desktop/<num>/0). For screenshots, save the .jpg to Desktop (do not paste base64)."
+  default_prompt: "Configure CloudBrowser MCP (Claude Desktop, Cursor, Inspector, or HTTP), validate the token, and run a tools/list + tools/call smoke test. Do not use deprecated actor endpoints/functions for navigation/content; use Puppeteer-style MCP commands instead. Restrict API usage to open/close/login/captcha solve. If a login wall blocks you, do not close the browser: offer Remote Desktop (https://app.cloudbrowser.ai/remote-desktop/<num>/0). For screenshots, save the .jpg to Desktop (do not paste base64)."

@@ -16,6 +16,8 @@ const path = require("node:path");
 const { spawn } = require("node:child_process");
 
 const DEFAULT_REPO = "CloudBrowser-AI/skills";
+const PKG_ROOT = path.resolve(__dirname, "..");
+const DEFAULT_SOURCE = fs.existsSync(path.join(PKG_ROOT, "skills")) ? PKG_ROOT : DEFAULT_REPO;
 
 function resolveSkillsCli() {
   const pkgPath = require.resolve("skills/package.json");
@@ -38,26 +40,30 @@ function main() {
 
   const first = args[0];
   const isFlagOnly = !first || String(first).startsWith("-");
+  const wantsHelp = args.includes("--help") || args.includes("-h");
+  const wantsVersion = args.includes("--version") || args.includes("-v");
 
   // If the user isn't explicitly running a top-level command, default to:
-  //   skills add CloudBrowser-AI/skills <args>
+  //   skills add <source> <args>
   const passthroughCommands = new Set(["remove", "list", "ls", "find", "init", "check", "update"]);
 
   let finalArgs;
   if (isFlagOnly) {
-    finalArgs = ["add", DEFAULT_REPO, ...args];
+    if (wantsHelp) finalArgs = ["--help"];
+    else if (wantsVersion) finalArgs = ["--version"];
+    else finalArgs = ["add", DEFAULT_SOURCE, ...args];
   } else if (first === "add") {
     const repo = args[1];
     if (repo && !String(repo).startsWith("-")) {
       finalArgs = args; // user provided repo
     } else {
-      finalArgs = ["add", DEFAULT_REPO, ...args.slice(1)];
+      finalArgs = ["add", DEFAULT_SOURCE, ...args.slice(1)];
     }
   } else if (passthroughCommands.has(first)) {
     finalArgs = args;
   } else {
     // Treat unknown command as "add" options to keep `npx @cloudbrowser/skills --list` style working.
-    finalArgs = ["add", DEFAULT_REPO, ...args];
+    finalArgs = ["add", DEFAULT_SOURCE, ...args];
   }
 
   const cliPath = resolveSkillsCli();
