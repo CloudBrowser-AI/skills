@@ -6,6 +6,13 @@
 - STDIO: set `CLOUDBROWSER_API_TOKEN`.
 - HTTP: send `Authorization: Bearer <token>`.
 
+## Policy (Mandatory)
+
+- Do not use obsolete actor functions for navigation/content (`/api/v1/remote/goto`, `/api/v1/remote/getcontent`, `/api/GoTo`, `/api/GetContent`).
+- API usage is limited to specific actions: `open`, `close`, `login`, and captcha solving (`/solve`).
+- Use Puppeteer-style MCP commands for everything else: `navigate_to_url`, `type_text`, `click_element`, `evaluate_script`, `get_page_content`.
+- Prefer browser-driven auth flow (fill form + submit) over legacy remote actor calls.
+
 ## STDIO (Claude Desktop / Cursor)
 
 Base configuration:
