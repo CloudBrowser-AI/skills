@@ -15,4 +15,6 @@ The connector does not add an AI inference charge. Browser and proxy usage follo
 
 Publication in this repository, package validation, installation, a completed browser job and directory approval are different states. No marketplace badge or acceptance is implied.
 
-[CloudBrowser](https://cloudbrowser.ai) · [Privacy](https://cloudbrowser.gitbook.io/docs/legal/privacy-policy) · [Terms](https://cloudbrowser.gitbook.io/docs/legal/terms-of-service) · Support: contact@cloudbrowser.ai
+[CloudBrowser](https://cloudbrowser.ai) · Support: contact@cloudbrowser.ai
+
+The service’s existing public privacy and terms links currently return 404. Working legal pages are a pending requirement for consumer-directory submission.
