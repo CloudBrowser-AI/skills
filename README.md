@@ -1,78 +1,18 @@
-# @cloudbrowser/skills
+# CloudBrowser client packages
 
-Bootstrap package to install CloudBrowser Codex skills.
+Finish a bounded web research or QA task in your CloudBrowser account, return page evidence, and close the browser. These packages reuse the hosted [CloudBrowser MCP](https://cloudbrowser.ai/mcp) and one [workflow skill](skills/cloudbrowser/SKILL.md).
 
-## Purpose
+- **Claude Code:** `.claude-plugin/plugin.json` and `.mcp.json`; validate with `claude plugin validate .`, then load locally with `claude --plugin-dir /absolute/path/to/skills`.
+- **Gemini CLI:** root `gemini-extension.json`; install with `gemini extensions install https://github.com/CloudBrowser-AI/skills`.
+- **Grok Build:** `.grok-plugin/plugin.json`, the shared MCP configuration and skills; marketplace acceptance is separate from this public source package.
+- **Codex/other skill clients:** use the existing `skills/cloudbrowser` directory or the established skills installer. Consumer OAuth requires a separately verified account connection.
 
-This README is intentionally limited to installation and MCP registration over `stdio`.
+[Setup and exact first job](skills/cloudbrowser/references/quick-reference.md).
 
-All MCP usage instructions, policies, flows, troubleshooting, and agent behavior live in:
+The developer packages use your own CloudBrowser API token from the [account app](https://app.cloudbrowser.ai). Configure it in the client's local secret/environment setting, never in a chat. Gemini declares it as a sensitive setting. No npm package download is needed by the hosted MCP configuration.
 
-- `skills/cloudbrowser/SKILL.md`
+The connector does not add an AI inference charge. Browser and proxy usage follows your CloudBrowser plan; the package does not provide free usage or guarantee a monetary ceiling. The first-job script prepares its plan without opening a browser unless explicitly run with metered-use authorization.
 
-Use `SKILL.md` as the single source of truth for CloudBrowser MCP operation.
+Publication in this repository, package validation, installation, a completed browser job and directory approval are different states. No marketplace badge or acceptance is implied.
 
-## Requirements
-
-- Node.js `>=18`
-- A CloudBrowser.ai token (UUID format)
-- `npx` available
-
-## 1) Install skills (this package)
-
-Interactive:
-
-```bash
-npx @cloudbrowser/skills
-```
-
-Non-interactive (recommended):
-
-```bash
-npx @cloudbrowser/skills --global --skill cloudbrowser -y
-```
-
-Verify installation:
-
-```bash
-skills list
-```
-
-Note:
-`@cloudbrowser/skills` is a wrapper around the `skills` CLI and installs from the packaged skills included in this npm package by default.
-
-Direct upstream CLI alternative:
-
-```bash
-npx skills add CloudBrowser-AI/skills --skill cloudbrowser
-```
-
-## 2) Register CloudBrowser MCP (STDIO only)
-
-Base MCP config:
-
-```json
-{
-  "mcpServers": {
-    "cloudbrowser": {
-      "command": "npx",
-      "args": ["@cloudbrowser/mcp-server"],
-      "env": {
-        "CLOUDBROWSER_API_TOKEN": "your_api_token_here"
-      }
-    }
-  }
-}
-```
-
-Typical config locations:
-
-- Claude Desktop (Windows): `%APPDATA%\\Claude\\claude_desktop_config.json`
-- Claude Desktop (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Cursor: `~/.cursor/mcp.json`
-
-After editing the JSON file, restart the MCP client.
-
-## Repo layout
-
-- `skills/cloudbrowser/SKILL.md`: canonical MCP usage and policy instructions.
+[CloudBrowser](https://cloudbrowser.ai) · [Privacy](https://cloudbrowser.gitbook.io/docs/legal/privacy-policy) · [Terms](https://cloudbrowser.gitbook.io/docs/legal/terms-of-service) · Support: contact@cloudbrowser.ai

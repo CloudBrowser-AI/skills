@@ -1,0 +1,25 @@
+{
+  "name": "cloudbrowser",
+  "version": "0.1.0",
+  "description": "Run bounded web research and QA in your CloudBrowser account, return page evidence, and close the session.",
+  "mcpServers": {
+    "cloudbrowser": {
+      "httpUrl": "https://mcp.cloudbrowser.ai",
+      "headers": {
+        "Authorization": "Bearer ${CLOUDBROWSER_API_TOKEN}"
+      },
+      "timeout": 60000,
+      "excludeTools": [
+        "solve_captcha"
+      ]
+    }
+  },
+  "settings": [
+    {
+      "name": "CloudBrowser API token",
+      "description": "Your own account token from https://app.cloudbrowser.ai/api. Browser usage follows your CloudBrowser plan.",
+      "envVar": "CLOUDBROWSER_API_TOKEN",
+      "sensitive": true
+    }
+  ]
+}

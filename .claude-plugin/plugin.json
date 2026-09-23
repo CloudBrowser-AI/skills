@@ -1,0 +1,19 @@
+{
+  "name": "cloudbrowser",
+  "version": "0.1.0",
+  "description": "Run bounded web research and QA in your CloudBrowser account, return page evidence, and close the session.",
+  "author": {
+    "name": "CloudBrowser",
+    "email": "contact@cloudbrowser.ai",
+    "url": "https://cloudbrowser.ai"
+  },
+  "homepage": "https://cloudbrowser.ai/mcp",
+  "repository": "https://github.com/CloudBrowser-AI/skills",
+  "license": "MIT",
+  "keywords": [
+    "browser",
+    "research",
+    "qa",
+    "mcp"
+  ]
+}

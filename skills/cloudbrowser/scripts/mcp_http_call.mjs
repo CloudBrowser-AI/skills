@@ -10,6 +10,7 @@
  */
 
 import fs from "node:fs";
+import { createClient } from "./mcp_client.mjs";
 import os from "node:os";
 import path from "node:path";
 
@@ -198,10 +199,10 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
 
   const endpoint = args.endpoint || "https://mcp.cloudbrowser.ai";
-  const token = args.token;
+  const token = args.token || process.env.CLOUDBROWSER_API_TOKEN;
   const id = args.id ? Number(args.id) : 1;
 
-  if (!token) usageAndExit(2);
+  if (!token && args.tool) usageAndExit(2);
 
   const method = args.tool ? "tools/call" : (args.method || "tools/list");
   let params = {};
@@ -226,33 +227,16 @@ async function main() {
     }
   }
 
-  const payload = { jsonrpc: "2.0", id, method, params };
-  const headers = {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`,
-  };
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
-
-  const text = await res.text();
-  let body;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    body = { _raw: text };
-  }
-
-  const out = {
-    http: { ok: res.ok, status: res.status, statusText: res.statusText },
-    jsonrpc: body,
-  };
+  const client = createClient({ endpoint, token });
+  await client.connect();
+  const result = await client.request(method, params);
+  const body = { jsonrpc: "2.0", id, result };
+  const out = { jsonrpc: body };
 
   if (args["save-screenshot"]) {
-    const dataUrl = body?.result?.screenshot || body?.result?.screenshotDataUrl;
+    const toolText = body?.result?.content?.find(item => item.type === 'text')?.text;
+    const toolResult = toolText ? JSON.parse(toolText) : body.result;
+    const dataUrl = toolResult?.screenshot || toolResult?.screenshotDataUrl;
     if (typeof dataUrl === "string" && dataUrl.startsWith("data:image/")) {
       const savedTo = saveScreenshotDataUrl({ dataUrl, out: args.out });
       out.saved = { screenshot: savedTo };

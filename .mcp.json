@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "cloudbrowser": {
+      "type": "http",
+      "url": "https://mcp.cloudbrowser.ai",
+      "headers": {
+        "Authorization": "Bearer ${CLOUDBROWSER_API_TOKEN}"
+      }
+    }
+  }
+}

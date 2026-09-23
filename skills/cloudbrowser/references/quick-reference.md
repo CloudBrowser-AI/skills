@@ -1,122 +1,45 @@
-# CloudBrowser MCP Quick Reference
+# Client setup and bounded first job
 
-## Token
+The hosted server uses Streamable HTTP at `https://mcp.cloudbrowser.ai`. API-token authentication is intended for developer clients. Consumer OAuth and directory acceptance must be verified separately; a direct install does not establish either.
 
-- Expected format: UUID.
-- STDIO: set `CLOUDBROWSER_API_TOKEN`.
-- HTTP: send `Authorization: Bearer <token>`.
+## Claude Code
 
-## Policy (Mandatory)
+Clone this repository and start Claude Code with `--plugin-dir /absolute/path/to/skills` to load the package locally. Configure `CLOUDBROWSER_API_TOKEN` in your local environment before starting the client; use your own token from the signed-in CloudBrowser account app. Do not paste the value into a prompt. Run `claude plugin validate /absolute/path/to/skills` to check the package.
 
-- Do not use obsolete actor functions for navigation/content (`/api/v1/remote/goto`, `/api/v1/remote/getcontent`, `/api/GoTo`, `/api/GetContent`).
-- API usage is limited to specific actions: `open`, `close`, `login`, and captcha solving (`/solve`).
-- Use Puppeteer-style MCP commands for everything else: `navigate_to_url`, `type_text`, `click_element`, `evaluate_script`, `get_page_content`.
-- Prefer browser-driven auth flow (fill form + submit) over legacy remote actor calls.
+## Gemini CLI
 
-## STDIO (Claude Desktop / Cursor)
+`gemini extensions install https://github.com/CloudBrowser-AI/skills`
 
-Base configuration:
-```json
-{
-  "mcpServers": {
-    "cloudbrowser": {
-      "command": "npx",
-      "args": ["@cloudbrowser/mcp-server"],
-      "env": {
-        "CLOUDBROWSER_API_TOKEN": "your_api_token_here"
-      }
-    }
-  }
-}
+The extension prompts for the CloudBrowser API token as a sensitive setting. Its manifest connects directly to the hosted service, so npm publishing access is not a prerequisite. Restart Gemini CLI after installation and inspect `/mcp` before using the tools.
+
+## Grok Build
+
+The repository includes a Grok plugin manifest and the same workflow/MCP configuration. Follow the client's supported plugin install route. Official marketplace submission requires a pinned source commit, generated component index and reviewed registry PR. Source availability is not marketplace acceptance.
+
+## Bounded first useful job
+
+Node 18 or newer is required. This prepares the exact run without starting a browser:
+
+```sh
+node skills/cloudbrowser/scripts/run_bounded_job.mjs
 ```
 
-Common locations:
+After approving metered usage for your own account and configuring the token locally:
 
-- Claude Desktop (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Claude Desktop (Windows): `%APPDATA%\\Claude\\claude_desktop_config.json`
-- Cursor: `~/.cursor/mcp.json`
-
-## HTTP (Hosted or Local)
-
-### Discover real schemas (always)
-
-`tools/list`:
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/list",
-  "params": {}
-}
+```sh
+node skills/cloudbrowser/scripts/run_bounded_job.mjs --run --allow-metered --out ./cloudbrowser-result
 ```
 
-Note: Do not assume field names from older examples. Read `inputSchema` from `tools/list`.
+One browser, one public CloudBrowser MCP page, at most 90 seconds of workflow time plus bounded cleanup; 60-second browser inactivity expiry. No account creation, purchase, form submission, CAPTCHA solving or external writes. A wall-clock limit cannot guarantee a dollar ceiling or prove provider cost. If the open response is ambiguous, the script does not retry it; check the account browser list before another attempt.
 
-### Call a tool
+## Lower-level HTTP helper
 
-`tools/call` template:
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 2,
-  "method": "tools/call",
-  "params": {
-    "name": "open_browser",
-    "arguments": {
-      "headless": true,
-      "keepOpen": 300
-    }
-  }
-}
+Set `CLOUDBROWSER_API_TOKEN` in the environment. Discover current schemas first:
+
+```sh
+node skills/cloudbrowser/scripts/mcp_http_call.mjs --method tools/list
 ```
 
-### Test script (Node)
+For tools requiring a session, first open a browser, connect its returned address to your chosen `sessionId`, perform the bounded task and close the exact address. Do not print browser addresses or authentication material in public logs.
 
-List tools:
-```bash
-node scripts/mcp_http_call.mjs --token <uuid> --method tools/list
-```
-
-Open browser:
-```bash
-node scripts/mcp_http_call.mjs --token <uuid> --tool open_browser --args "{\"headless\":true,\"keepOpen\":300}"
-```
-
-Take a screenshot and save it to Desktop (default):
-```bash
-node scripts/mcp_http_call.mjs --token <uuid> --tool take_screenshot --args "{\"sessionId\":\"session-1\",\"type\":\"jpeg\"}" --save-screenshot
-```
-
-Save a `data:image/...;base64,...` manually (stdin -> Desktop):
-```bash
-echo "data:image/jpeg;base64,..." | node scripts/save_data_url_image.mjs
-```
-
-## Recommended flow (package v0.1.2)
-
-1. `open_browser` -> read `address` (ws endpoint) from the result.
-2. `connect_to_browser` with:
-   - `browserAddress`: the `address` from the previous step
-   - `sessionId`: a string chosen by the client (e.g. `session-1`)
-3. Control with `sessionId`:
-   - `navigate_to_url`
-   - `get_page_content`
-   - `click_element`
-   - `type_text`
-   - `take_screenshot`
-   - `evaluate_script`
-4. Cleanup:
-   - `disconnect_browser` (by `sessionId`)
-   - `close_browser` (by `address`, if applicable)
-
-## Login walls / Remote Desktop link
-
-If a login/2FA/CAPTCHA blocks you, **do not close the browser**. Start Remote Desktop and share the direct link:
-
-- WebSocket: `ws://browser.cloudbrowser.ai/<num>/devtools/browser/<id>`
-- Link: `https://app.cloudbrowser.ai/remote-desktop/<num>/0`
-
-Helper:
-```bash
-node scripts/ws_to_remote_desktop_url.mjs --ws "ws://browser.cloudbrowser.ai/128/devtools/browser/<id>"
-```
+For existing stdio setups, use the reviewed CloudBrowserMCP source or a verified published package version. npm latest can lag hosted releases; do not assume `npx @cloudbrowser/mcp-server` matches the hosted server.
