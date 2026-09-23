@@ -17,4 +17,4 @@ Publication in this repository, package validation, installation, a completed br
 
 [CloudBrowser](https://cloudbrowser.ai) · Support: contact@cloudbrowser.ai
 
-The service’s existing public privacy and terms links currently return 404. Working legal pages are a pending requirement for consumer-directory submission.
+[Privacy policy](https://cloudbrowser.ai/privacy-policy) · [Terms of service](https://cloudbrowser.ai/terms-of-service).
