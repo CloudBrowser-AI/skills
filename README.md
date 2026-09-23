@@ -9,6 +9,8 @@ Finish a bounded web research or QA task in your CloudBrowser account, return pa
 
 [Setup and exact first job](skills/cloudbrowser/references/quick-reference.md).
 
+[Reviewer guide and reproducible test cases](review/README.md).
+
 The developer packages use your own CloudBrowser API token from the [account app](https://app.cloudbrowser.ai). Configure it in the client's local secret/environment setting, never in a chat. Gemini declares it as a sensitive setting. No npm package download is needed by the hosted MCP configuration.
 
 The connector does not add an AI inference charge. Browser and proxy usage follows your CloudBrowser plan; the package does not provide free usage or guarantee a monetary ceiling. The first-job script prepares its plan without opening a browser unless explicitly run with metered-use authorization.
