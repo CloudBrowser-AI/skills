@@ -1,6 +1,6 @@
 # CloudBrowser reviewer guide
 
-This guide describes the submitted workflows. It is not a record of completed tests or directory approval. The exact five positive and three negative cases are in [test-cases.json](test-cases.json). Execution and the demonstration recording remain pending until the dedicated review account is available.
+This guide describes the proposed review workflows. The exact five positive and three negative cases are in [test-cases.json](test-cases.json). The dedicated account is provisioned. The [24 September execution report](results-2026-09-24.md) records five passed cases and three blocked cases, including a ChatGPT image-artifact limitation. The draft remains unsubmitted; no directory approval is claimed.
 
 ## Review account and connection
 
@@ -20,6 +20,8 @@ After the cases, verify that revoking the test connection under https://app.clou
 
 ## Demonstration recording
 
+The [24 September recording](https://cloudbrowser.ai/review/cloudbrowser-chatgpt-review-20260924.mp4) uses actual authenticated ChatGPT screen captures. Idle time is shortened and result screens are held for readability. It shows account inventory, the research recheck, a comparison with tool activity and cleanup, the unresolved screenshot result, a host-blocked negative case, and the final empty browser list. It is an edited test walkthrough, not continuous footage of all eight cases or an all-pass demonstration. See the execution report for every result and the two timing overruns.
+
 Record the real ChatGPT Developer Mode interaction after successful account connection. A concise recording should show:
 
 1. The CloudBrowser connection name and production endpoint, without revealing the password, authorization code, token, or private connection URL.
@@ -33,7 +35,7 @@ A storyboard or synthetic animation is not a replacement for this recording. If 
 
 ## Credential-field template
 
-Complete this only in the private submission field once sign-in and all tests have passed:
+Complete this only in the private submission field after sign-in and entitlement are verified. Include unresolved cases accurately; do not submit while required functionality remains unverified:
 
 - Account/workspace: CloudBrowser dedicated review account; sample data only.
 - Login URL: https://app.cloudbrowser.ai/auth/login
@@ -53,7 +55,7 @@ Complete this only in the private submission field once sign-in and all tests ha
 
 ## Tool annotation justifications
 
-These explanations match the published 0.1.6 tool metadata. Refresh them if the imported tool schemas change. `Read-only`, `Destructive`, and `Open-world` are the MCP annotation values, not a blanket permission to run a tool.
+These explanations match the deployed 0.1.7 tool metadata. Refresh them if the imported tool schemas change. `Read-only`, `Destructive`, and `Open-world` are the MCP annotation values, not a blanket permission to run a tool.
 
 | Tool | Read-only | Destructive | Open-world | Justification |
 | --- | --- | --- | --- | --- |
