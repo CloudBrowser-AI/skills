@@ -1,6 +1,6 @@
 # CloudBrowser reviewer guide
 
-This guide describes the proposed review workflows. The exact five positive and three negative cases are in [test-cases.json](test-cases.json). The dedicated account is provisioned. The [24 September execution report](results-2026-09-24.md) records six passed cases and two host-blocked negative cases, retaining the initial screenshot failure and its verified repair. The draft remains unsubmitted; no directory approval is claimed.
+This guide describes the proposed review workflows. The exact five positive and three negative cases are in [test-cases.json](test-cases.json). The dedicated account is provisioned. The [24 September execution report](results-2026-09-24.md) records eight passing cases in the current submission set, with two original security probes retained separately as host-blocked history. The draft awaits owner legal/policy attestations; no directory approval is claimed.
 
 ## Review account and connection
 
@@ -20,7 +20,7 @@ After the cases, verify that revoking the test connection under https://app.clou
 
 ## Demonstration recording
 
-The [24 September recording](https://cloudbrowser.ai/review/cloudbrowser-chatgpt-review-20260924.mp4) uses actual authenticated ChatGPT screen captures. Idle time is shortened and result screens are held for readability. It shows account inventory, the research recheck, a comparison with tool activity and cleanup, the unresolved screenshot result, a host-blocked negative case, and the initial empty browser list. An appended follow-up shows the actual 1920×1080 screenshot viewer, final usage of 16 units and verified cleanup of all five approved browsers. Expand the ChatGPT tool activity to see the screenshot widget. It is an edited test walkthrough, not continuous footage of all eight cases or an all-pass demonstration. See the execution report for every result and the two timing overruns.
+The [24 September recording](https://cloudbrowser.ai/review/cloudbrowser-chatgpt-review-20260924.mp4) uses actual authenticated ChatGPT screen captures. Idle time is shortened and result screens are held for readability. It shows account inventory, the research recheck, a comparison with tool activity and cleanup, the unresolved screenshot result, a host-blocked negative case, and the initial empty browser list. An appended follow-up shows the actual 1920×1080 screenshot viewer, final usage of 16 units and verified cleanup of all five approved browsers. A final appendix shows two new negative boundary cases: asking for a missing screenshot URL and explaining that a laptop-local PDF is inaccessible. Both passed without tools or allocation, completing the current eight-case submission set; the original security probes remain host-blocked history. Expand the ChatGPT tool activity if the screenshot widget is collapsed. It is an edited test walkthrough, not continuous footage of every case. The final chapter distinguishes the current passing submission set from historical blocked probes. See the execution report for every result and the two timing overruns.
 
 Record the real ChatGPT Developer Mode interaction after successful account connection. A concise recording should show:
 
