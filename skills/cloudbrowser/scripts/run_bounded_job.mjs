@@ -7,7 +7,7 @@ import { createClient } from './mcp_client.mjs';
 
 export const plan = Object.freeze({
   target: 'https://cloudbrowser.ai/mcp', purpose: 'Check the MCP page title/content and save page evidence',
-  browsers: 1, workflowSeconds: 90, inactivitySeconds: 60, saveSession: false,
+  browsers: 1, workflowSeconds: 90, inactivitySeconds: 180, saveSession: false,
   paidUsage: 'Requires explicit metered-use authorization. Cost is not established by a time limit.',
 });
 
@@ -23,7 +23,7 @@ export async function runJob({ client, out, target = plan.target, workflowSecond
       if (!tools.some(tool => tool.name === required)) throw new Error(`Required tool missing: ${required}`);
     }
     // Never retry an ambiguous open: it may already have allocated a paid session.
-    const opened = await client.call('open_browser', { headless: true, keepOpen: 60, saveSession: false, recoverSession: false, label: sessionId }, within());
+    const opened = await client.call('open_browser', { headless: true, keepOpen: 180, saveSession: false, recoverSession: false, label: sessionId }, within());
     address = opened.address;
     if (!address) throw new Error('Browser open did not return an address. Check your account before retrying.');
     await client.call('connect_to_browser', { browserAddress: address, sessionId }, within());

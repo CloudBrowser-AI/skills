@@ -8,7 +8,7 @@ Use a dedicated CloudBrowser account containing sample data only. Supply its log
 
 The login URL is https://app.cloudbrowser.ai/auth/login. In ChatGPT Developer Mode, connect the production MCP endpoint https://mcp.cloudbrowser.ai using OAuth. Sign in at CloudBrowser, check the app and account shown on the consent screen, and authorize browser control. The OAuth flow handles the connection; reviewers do not enter an API token in a prompt. Refresh the imported tool list and confirm 18 tools are available.
 
-Browser and proxy usage follows the account plan. Each positive case that allocates a browser explicitly authorizes one browser, a 90-second workflow limit and a 60-second inactivity timeout. Run the four allocating cases serially, never in parallel. These time bounds do not establish a monetary ceiling. Confirm the review account's usage allowance before execution. Keep saveSession and recoverSession false, never retry an ambiguous open, and stop the run if cleanup cannot be verified. Do not change a plan, add payment details, or delete pre-existing sessions to make the test pass.
+Browser and proxy usage follows the account plan. Each positive case that allocates a browser explicitly authorizes one browser, a 90-second workflow limit and a 180-second inactivity timeout. Run the four allocating cases serially, never in parallel. The approved review allowance is 200 units/month with paid overage disabled; stop this initial run at 40 observed units. Periodic metering may overshoot. The provider applies a 180-second minimum idle period, so always explicitly close each browser. These bounds do not establish a monetary ceiling; operating cost is unknown. Confirm the review account's usage allowance before execution. Keep saveSession and recoverSession false, never retry an ambiguous open, and stop the run if cleanup cannot be verified. Do not change a plan, add payment details, or delete pre-existing sessions to make the test pass.
 
 ## Run and record results
 
@@ -41,7 +41,7 @@ Complete this only in the private submission field once sign-in and all tests ha
 - Sign-in: email/password; no MFA, email code or VPN required (verify first).
 - Connection: https://mcp.cloudbrowser.ai, OAuth; authorize browser control for this account.
 - Sample data: the public CloudBrowser MCP, privacy and terms pages in the supplied cases.
-- Entitlement: describe the actual tested browser allowance and keep it available for ongoing review.
+- Entitlement: after verification, state 1 concurrent browser, 1 tab, 200 units/month, with paid overage disabled. Private review access expires 23 December 2026 at 23:59 UTC; arrange renewal or withdrawal before expiry.
 - Results: date/surface and actual outcome of all five positive and three negative cases.
 
 ## References
