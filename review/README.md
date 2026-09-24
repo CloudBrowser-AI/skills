@@ -1,6 +1,6 @@
 # CloudBrowser reviewer guide
 
-This guide describes the proposed review workflows. The exact five positive and three negative cases are in [test-cases.json](test-cases.json). The dedicated account is provisioned. The [24 September execution report](results-2026-09-24.md) records eight passing cases in the current submission set, with two original security probes retained separately as host-blocked history. The draft awaits owner legal/policy attestations; no directory approval is claimed.
+This guide describes the submitted review workflows. The exact five positive and three negative cases are in [test-cases.json](test-cases.json). The dedicated account is provisioned. The [24 September execution report](results-2026-09-24.md) records eight passing cases in the current submission set, with two original security probes retained separately as host-blocked history. CloudBrowser 1.0.0 was submitted for OpenAI review on 24 September 2026 after the owner confirmed the final legal/policy statements. The portal confirmed submission at 12:14 UTC; review approval and directory publication remain pending.
 
 ## Review account and connection
 
