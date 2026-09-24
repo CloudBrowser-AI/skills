@@ -1,7 +1,7 @@
 {
   "product": "CloudBrowser",
   "mcp_url": "https://mcp.cloudbrowser.ai",
-  "execution_status": "Executed 24 September 2026 in ChatGPT web Developer Mode (6 Pro): five cases passed after scoped repairs; screenshot artifact delivery and two host-gated negative cases remain blocked. See results-2026-09-24.md for actual results and retained initial failures.",
+  "execution_status": "Executed 24 September 2026 in ChatGPT web Developer Mode (6 Pro): six cases passed after scoped repairs and an explicitly approved fifth-browser screenshot acceptance. Two host-gated negative cases remain blocked. All five browsers closed; 16 of 200 units observed. See results-2026-09-24.md for actual results and retained initial failures.",
   "positive": [
     {
       "description": "Inspect the connected account without allocating a browser",
