@@ -55,7 +55,7 @@ Complete this only in the private submission field after sign-in and entitlement
 
 ## Tool annotation justifications
 
-These explanations match the deployed 0.1.7 tool metadata. Refresh them if the imported tool schemas change. `Read-only`, `Destructive`, and `Open-world` are the MCP annotation values, not a blanket permission to run a tool.
+These explanations match the deployed 0.1.8 tool metadata. Refresh them if the imported tool schemas change. `Read-only`, `Destructive`, and `Open-world` are the MCP annotation values, not a blanket permission to run a tool.
 
 | Tool | Read-only | Destructive | Open-world | Justification |
 | --- | --- | --- | --- | --- |
